@@ -11,14 +11,27 @@ def genetic_algorithm(target, population_size=100, mutation_rate=0.01, generatio
         point = random.randint(1, len(target) - 1)
         return parent1[:point] + parent2[point:]
     
+    # Inicializar población aleatoria
     population = [''.join(random.choice('01') for _ in target) for _ in range(population_size)]
     
     for _ in range(generations):
+        # Ordenar por mejor aptitud
         population = sorted(population, key=fitness, reverse=True)
+        
+        # Si el mejor individuo ya es el objetivo, terminamos
         if fitness(population[0]) == len(target):
             return population[0]
-        next_gen = [crossover(population[i], population[i+1]) for i in range(0, population_size-1, 2)]
-        population = [mutate(ind) for ind in next_gen]
+        
+        # Mantener una parte de la mejor población (elitismo)
+        next_gen = population[:10]  # Conservamos los mejores 10 individuos
+        
+        # Generar nuevos individuos por cruza
+        while len(next_gen) < population_size:
+            parent1, parent2 = random.sample(population[:50], 2)  # Selección de padres más aptos
+            offspring = mutate(crossover(parent1, parent2))
+            next_gen.append(offspring)
+        
+        population = next_gen  # Reemplazar la población actual
     
     return population[0]
 
